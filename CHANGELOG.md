@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.0] - Unreleased
+## [Unreleased]
 
 ### Added
 
@@ -22,4 +22,4 @@
 - Playwright end-to-end UI tests
 - Accessibility testing with pa11y
 
-[0.1.0]: https://github.com/inf0-dev/alma/releases/tag/v0.1.0
+[Unreleased]: https://github.com/inf0-dev/alma/compare/v0.0.1...HEAD

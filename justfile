@@ -101,3 +101,33 @@ build:
 
 build-release os='darwin' arch='arm64':
     @ GOOS={{ os }} GOARCH={{ arch }} go build -ldflags="{{ ldflags }}" -o {{ out_dir }}/alma-{{ os }}-{{ arch }} ./app/cli
+
+# prepare a release: update CHANGELOG, commit, and print next steps
+[arg("tag", pattern="v[0-9]+\\.[0-9]+\\.[0-9]+", help="semver tag to release (e.g. v0.1.0)")]
+release tag:
+    #!/usr/bin/env bash
+    set -eu
+    branch=$(git branch --show-current)
+    if [ "$branch" = "main" ]; then
+        echo "error: do not release from $branch. create a release branch first"
+        exit 1
+    fi
+    ver="{{ tag }}"
+    semver="${ver#v}"
+    today=$(date +%Y-%m-%d)
+    grep -q "## \[Unreleased\]" CHANGELOG.md || { echo "error: no [Unreleased] section in CHANGELOG.md"; exit 1; }
+    sed -i "" "s/## \[Unreleased\]/## [$semver] - $today/" CHANGELOG.md
+    sed -i "" "s|^\[Unreleased\]:.*|[$semver]: https://github.com/inf0-dev/alma/releases/tag/$ver|" CHANGELOG.md
+    awk -v s="$semver" -v v="$ver" '
+      /^## \[/{if(index($0,s)){print "## [Unreleased]\n"; print; next}}
+      /^\[/{if(index($0,s)){print "[Unreleased]: https://github.com/inf0-dev/alma/compare/" v "...HEAD"; print; next}}
+      1' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+    git add CHANGELOG.md
+    git commit -m "release: $ver"
+    echo ""
+    echo "CHANGELOG updated and committed."
+    echo "Next steps:"
+    echo "  1. git push && open PR to main"
+    echo "  2. After merge, tag the merge commit:"
+    echo "     git tag $ver <merge-commit-sha>"
+    echo "     git push origin $ver"
