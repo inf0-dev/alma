@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         confirmBtn.removeEventListener("click", onConfirm);
         cancelBtn.removeEventListener("click", onCancel);
         overlay.removeEventListener("click", onOverlay);
+        document.removeEventListener("keydown", onEscape);
         resolve(result);
       }
 
@@ -128,9 +129,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (e.target === overlay) cleanup(false);
       }
 
+      function onEscape(e) {
+        if (e.key === "Escape") cleanup(false);
+      }
+
       confirmBtn.addEventListener("click", onConfirm);
       cancelBtn.addEventListener("click", onCancel);
       overlay.addEventListener("click", onOverlay);
+      document.addEventListener("keydown", onEscape);
     });
   }
 
@@ -827,6 +833,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("click", function () {
       exportMenu.style.display = "none";
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && exportMenu.style.display !== "none") {
+        exportMenu.style.display = "none";
+        exportBtn.focus();
+      }
     });
   }
 

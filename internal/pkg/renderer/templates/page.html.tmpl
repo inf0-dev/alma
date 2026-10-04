@@ -9,6 +9,8 @@
   <link rel="shortcut icon" href="/assets/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="/assets/site.webmanifest">
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plaster&display=swap">
   <style>{{ .CSS }}</style>
 </head>
@@ -182,7 +184,7 @@
     </div>
   </details>
 
-  <details class="section" id="decision-section" open>
+  <details class="section" id="decision-section" open aria-live="polite">
     <summary class="section-heading">
       <svg class="chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       <span class="section-title">Decision</span>
