@@ -27,7 +27,23 @@ on:
       - ".github/workflows/**"
 
 jobs:
-  tests:
+  build:
+    name: Build
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Deps - Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.27
+      - name: Install Deps - Just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
+      - name: Build Project
+        run: just build
+
+  test:
     name: Run Tests
     if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
