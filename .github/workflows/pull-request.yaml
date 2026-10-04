@@ -1,0 +1,79 @@
+name: PR
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - "internal/**"
+      - "app/**"
+      - "api/**"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "internal/**"
+      - "app/**"
+      - "api/**"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/**"
+
+jobs:
+  build:
+    name: Build
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Build Project
+        run: just build
+
+  test:
+    name: Run Tests
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Run Tests
+        run: just test
+      - name: Coverage Summary
+        run: |
+          go tool cover -func=_output/coverage/merged.out | tail -1 >> ${GITHUB_STEP_SUMMARY}
+
+  lint:
+    name: Run Linter
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Install GolangCI-Lint
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: v2.14
+      - name: Run Linter
+        run: just lint
+
+  format:
+    name: Check Code Formatting
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - name: Check Code Formatting
+        run: just fmt-check
