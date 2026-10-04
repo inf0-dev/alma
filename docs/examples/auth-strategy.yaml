@@ -1,0 +1,88 @@
+metadata:
+  version: "alma/v1"
+  author: "Platform Team"
+  date: "2026-10-03"
+schema:
+  title: "Authentication Strategy"
+  categories:
+    - security
+    - platform
+    - cost
+    - infrastructure
+  requirements:
+    - id: req-sso
+      description: "Support SSO via SAML or OIDC"
+      is_hard: true
+    - id: req-mfa
+      description: "Multi-factor authentication support"
+      is_hard: true
+    - id: req-cost
+      description: "Free tier covers first 10k MAU"
+      is_hard: false
+  items:
+    - id: q-users
+      description: "Expected monthly active users"
+      kind: choice
+      choice_options:
+        - id: small
+          description: "Under 1k"
+        - id: medium
+          description: "1k – 50k"
+        - id: large
+          description: "Over 50k"
+    - id: q-self-host
+      description: "Must be self-hostable"
+      kind: choice
+      choice_options:
+        - id: "yes"
+          description: "Yes"
+        - id: "no"
+          description: "No, SaaS is fine"
+  design_options:
+    - id: opt-auth0
+      title: "Auth0"
+      description: "Managed identity platform by Okta"
+      requirements_met:
+        req-sso:
+          met: true
+        req-mfa:
+          met: true
+        req-cost:
+          met: true
+      effects:
+        "q-users.large":
+          - kind: changes
+            category: cost
+            text: "Enterprise pricing required above 50k MAU"
+      blocks:
+        - condition:
+            - "q-self-host.yes"
+          reason: "Auth0 is SaaS-only, cannot be self-hosted"
+      pros:
+        - "Quickest to integrate"
+        - "Extensive documentation"
+      cons:
+        - "Vendor lock-in"
+        - "Expensive at scale"
+    - id: opt-keycloak
+      title: "Keycloak"
+      description: "Open-source identity and access management"
+      requirements_met:
+        req-sso:
+          met: true
+        req-mfa:
+          met: true
+        req-cost:
+          met: true
+      effects:
+        "q-users.large":
+          - kind: note
+            category: infrastructure
+            text: "Needs clustered deployment with shared database"
+      pros:
+        - "Fully self-hostable"
+        - "No per-user costs"
+        - "Active open-source community"
+      cons:
+        - "Significant operational overhead"
+        - "Java-based, heavy resource footprint"

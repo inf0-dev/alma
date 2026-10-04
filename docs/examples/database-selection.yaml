@@ -1,0 +1,143 @@
+metadata:
+  version: "alma/v1"
+  author: "Engineering Team"
+  date: "2026-10-01"
+schema:
+  title: "Database Selection"
+  issue: "https://github.com/example/project/issues/15"
+  categories:
+    - infrastructure
+    - data
+    - operations
+  requirements:
+    - id: req-acid
+      description: "Full ACID transaction support"
+      is_hard: true
+    - id: req-latency
+      description: "Read latency under 10ms at P95"
+      is_hard: true
+    - id: req-managed
+      description: "Available as a managed service"
+      is_hard: false
+    - id: req-oss
+      description: "Open-source with active community"
+      is_hard: false
+  items:
+    - id: q-scale
+      description: "Expected data volume in 12 months"
+      kind: choice
+      choice_options:
+        - id: small
+          description: "Under 100 GB"
+        - id: medium
+          description: "100 GB – 1 TB"
+        - id: large
+          description: "Over 1 TB"
+    - id: q-schema
+      description: "Schema flexibility needed"
+      kind: choice
+      choice_options:
+        - id: fixed
+          description: "Fixed schema, well-defined tables"
+        - id: flexible
+          description: "Schema evolves frequently"
+    - id: q-replicas
+      description: "Number of read replicas"
+      kind: number
+      number_config:
+        min: 0
+        max: 10
+    - id: q-notes
+      description: "Additional constraints or context"
+      kind: text
+  design_options:
+    - id: opt-postgres
+      title: "PostgreSQL"
+      description: "Relational database with strong SQL support and extensibility"
+      requirements_met:
+        req-acid:
+          met: true
+        req-latency:
+          met: true
+        req-managed:
+          met: true
+        req-oss:
+          met: true
+      effects:
+        "q-scale.large":
+          - kind: changes
+            category: operations
+            text: "Requires partitioning strategy and careful index management"
+        "q-schema.flexible":
+          - kind: note
+            category: data
+            text: "JSONB columns can handle semi-structured data"
+      pros:
+        - "Mature ecosystem with excellent tooling"
+        - "Strong SQL compliance"
+        - "JSONB for flexible data alongside relational"
+      cons:
+        - "Horizontal scaling requires extensions (Citus) or sharding"
+    - id: opt-mongo
+      title: "MongoDB"
+      description: "Document database with flexible schemas and horizontal scaling"
+      requirements_met:
+        req-acid:
+          met: false
+          partial: true
+          reason: "Multi-document transactions supported since v4.0 but with performance cost"
+        req-latency:
+          met: true
+        req-managed:
+          met: true
+        req-oss:
+          met: true
+      effects:
+        "q-scale.large":
+          - kind: note
+            category: infrastructure
+            text: "Native sharding handles large datasets well"
+        "q-schema.fixed":
+          - kind: note
+            category: data
+            text: "Schema validation can enforce structure, but adds overhead"
+      pros:
+        - "Flexible document model"
+        - "Built-in horizontal scaling"
+        - "Good developer experience for rapid iteration"
+      cons:
+        - "Multi-document transactions are slower than PostgreSQL"
+        - "Less mature tooling for complex queries"
+    - id: opt-sqlite
+      title: "SQLite"
+      description: "Embedded relational database, zero configuration"
+      requirements_met:
+        req-acid:
+          met: true
+        req-latency:
+          met: true
+        req-managed:
+          met: false
+        req-oss:
+          met: true
+      effects:
+        "q-scale.large":
+          - kind: changes
+            category: infrastructure
+            text: "Single-file database becomes impractical above ~100 GB"
+        "q-scale.medium":
+          - kind: note
+            category: infrastructure
+            text: "Works but requires careful WAL configuration"
+      blocks:
+        - condition:
+            - "q-scale.large"
+          reason: "SQLite is not designed for datasets over 1 TB"
+      pros:
+        - "Zero infrastructure cost"
+        - "No server to manage"
+        - "Excellent for development and testing"
+      cons:
+        - "Single-writer concurrency model"
+        - "No built-in replication"
+        - "Not available as managed service"
