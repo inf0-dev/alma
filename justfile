@@ -38,6 +38,10 @@ fmt-go:
 fmt-frontend:
     @ npx --yes prettier --write "internal/**/*.{css,js}" --log-level warn
 
+# check if formatting is correct
+fmt-check: fmt
+    @ git diff --exit-code
+
 # run accessibility check on rendered demo (light + dark)
 a11y: demo
     @ echo "--- light mode ---"
