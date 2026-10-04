@@ -18,6 +18,14 @@ go_test_integration:
     {{ init_dir_ine(cov_dir) }}
     @ go test -tags integration ./... -coverprofile={{ cov_dir }}/integration.out
 
+# run e2e ui tests (playwright)
+[arg("headless", pattern="(true|false)", help="whether to run in headless mode (no browser)")]
+e2e_ui headless='true':
+    @ cd e2e/ui && npx playwright test {{ if headless == "true" { "" } else { "--ui" } }}
+
+# run all e2e tests
+e2e: e2e_ui
+
 # run all tests and merge coverage
 test: go_test_unit go_test_integration test_coverage
 

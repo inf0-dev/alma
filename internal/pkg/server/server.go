@@ -49,8 +49,8 @@ func New(cfg Config, record *v1.Record) *Server {
 	}
 }
 
-// Run starts the HTTP server and blocks until the context is cancelled.
-func (s *Server) Run(ctx context.Context) error {
+// Handler returns the fully wired HTTP handler with all routes and middleware.
+func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", s.handleHealthz)
 	mux.HandleFunc("/upload", s.handleUpload)
@@ -59,9 +59,13 @@ func (s *Server) Run(ctx context.Context) error {
 	mux.HandleFunc("/finalize", s.handleFinalize)
 	mux.Handle("/assets/", http.FileServer(http.FS(assetsFS)))
 	mux.HandleFunc("/", s.handlePage)
+	return withCSP(mux)
+}
 
+// Run starts the HTTP server and blocks until the context is cancelled.
+func (s *Server) Run(ctx context.Context) error {
 	srv := &http.Server{
-		Handler: withCSP(mux),
+		Handler: s.Handler(),
 		BaseContext: func(_ net.Listener) context.Context {
 			return ctx
 		},
