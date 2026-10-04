@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-04
+
 ### Added
 
 - Declarative YAML/JSON document format for structured design decisions
@@ -22,4 +24,5 @@
 - Playwright end-to-end UI tests
 - Accessibility testing with pa11y
 
-[Unreleased]: https://github.com/inf0-dev/alma/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/inf0-dev/alma/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/inf0-dev/alma/releases/tag/v0.1.0
