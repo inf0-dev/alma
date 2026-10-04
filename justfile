@@ -23,6 +23,9 @@ go_test_integration:
 e2e_ui headless='true':
     @ cd e2e/ui && npx playwright test {{ if headless == "true" { "" } else { "--ui" } }}
 
+# run all e2e tests
+e2e: e2e_ui
+
 # run all tests and merge coverage
 test: go_test_unit go_test_integration test_coverage
 
