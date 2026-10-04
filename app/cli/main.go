@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var version = "n/a"
+
 func main() {
 	cmd := &cobra.Command{
 		Use:   "alma",
@@ -25,7 +27,7 @@ func main() {
 		serve.NewServeCommand(),
 	)
 
-	if err := fang.Execute(context.Background(), cmd); err != nil {
+	if err := fang.Execute(context.Background(), cmd, fang.WithVersion(version)); err != nil {
 		os.Exit(1)
 	}
 }

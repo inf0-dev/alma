@@ -2,6 +2,8 @@ set unstable
 
 out_dir := absolute_path("./_output")
 cov_dir := out_dir / "coverage"
+version := shell("git describe --tags --always --dirty")
+ldflags := "-s -w -X main.version=" + version
 
 # initialize directory if it does not exist
 init_dir_ine(dir) := shell(f"mkdir -p {{ dir }}")
@@ -87,4 +89,7 @@ check-dev:
     fi
 
 build:
-    @ go build -ldflags="-s -w" -o {{ out_dir }}/alma ./app/cli
+    @ go build -ldflags="{{ ldflags }}" -o {{ out_dir }}/alma ./app/cli
+
+build-release os='darwin' arch='arm64':
+    @ GOOS={{ os }} GOARCH={{ arch }} go build -ldflags="{{ ldflags }}" -o {{ out_dir }}/alma-{{ os }}-{{ arch }} ./app/cli
