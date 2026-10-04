@@ -6,7 +6,7 @@
 
 **AL**ignment **MA**trix. A declarative tool for structured design decisions.
 
-Define requirements, items, and design options in a YAML/JSON file. `alma` evaluates which options are viable based on constraints and renders an interactive UI for alignment meetings.
+Define requirements, items, and design options in a YAML/JSON document. alma evaluates which options are viable based on your constraints and renders an interactive UI for alignment sessions.
 
 <p align="center">
   <img src="docs/assets/demo-upload.webp" alt="Upload a document and explore options" width="720">
@@ -20,48 +20,86 @@ Define requirements, items, and design options in a YAML/JSON file. `alma` evalu
   <img src="docs/assets/demo-theme.webp" alt="Toggle between light and dark mode" width="720">
 </p>
 
+## Install
+
+Download a pre-built binary from the [latest release](https://github.com/inf0-dev/alma/releases/latest), or build from source:
+
+```bash
+just build    # outputs to ./_output/alma
+```
+
 ## Quick Start
 
 ```bash
-# build the binary
-just build
+# start the server with the upload UI
+alma serve
 
-# start the server (opens upload UI at localhost:8080)
-just serve
+# start with a document pre-loaded
+alma serve -p docs/examples/database-selection.yaml
 
-# or start with a file pre-loaded - if running after `just build`, `alma` is located in `./_output/alma`
-alma serve -p path/to/document.yaml
+# use a custom port
+just serve 3000
 ```
 
-Open `http://localhost:8080`, drag in a document or record file, and start aligning.
+Open `http://localhost:8080`, upload a document, and start aligning.
 
-> Tip: A demo file is included at `internal/pkg/renderer/testdata/demo.yaml` for reference.
+See [`docs/examples/`](docs/examples/) for sample documents.
 
 ## CLI
 
 ```
 alma validate -p <file>           Validate a document or record
-alma render -p <file> [-o f]      Render to self-contained HTML (stdout or file)
-alma export -p <file>             Export a record as markdown, JSON, or YAML
+alma render -p <file> [-o file]   Render to self-contained HTML
+alma export -p <file> [-o fmt]    Export a record (yaml, json, md)
 alma serve [-p <file>] [-a addr]  Start the web server
 ```
 
-## Development
+## Features
 
-```bash
-just go_test_unit          # unit tests
-just go_test_integration   # integration tests
-just test                  # all tests + merged coverage
-just update_golden         # regenerate golden files
-just demo                  # render demo and open in browser
-just a11y                  # run pa11y accessibility checks
-just lint                  # golangci-lint
-just fmt                   # go fmt
+- **Interactive evaluation.** Toggle requirements, answer items, and watch option statuses update in real time.
+- **Decision capture.** Pick an option, record who was present, add rationale, and finalize.
+- **Append-only history.** Every decision, undo, and change is recorded as an immutable audit entry.
+- **Multi-format export.** Download as YAML, JSON, or Markdown from the UI or CLI.
+- **PDF output.** Print-optimized layout via the browser's native print dialog.
+- **Dark mode.** System-aware with manual toggle.
+- **Fully static HTML.** `alma render` produces a single self-contained file that works offline.
+
+## Architecture
+
+```
+Document (YAML/JSON)
+    │
+    ▼
+  Engine ──▶ evaluates constraints, effects, blocks
+    │
+    ▼
+  Record ──▶ requirements, items, options, decision, history
+    │
+    ├──▶ Renderer ──▶ self-contained HTML
+    └──▶ Server   ──▶ interactive UI with live sync
 ```
 
-## How It Works
+1. **Document** defines requirements (hard/soft), items (choices, text, numbers), and design options with constraints, effects, and blocks.
+2. **Engine** evaluates which options are possible, blocked, or eliminated based on current answers and checked requirements.
+3. **Renderer** produces a self-contained HTML page with all styles and scripts inlined.
+4. **Server** serves the interactive UI, syncs state on every change, and handles export and finalization.
 
-1. **Document**: defines requirements (hard/soft), items (choices, text, numbers), and design options with their constraints
-2. **Engine**: evaluates which options are possible, blocked, or eliminated based on current state
-3. **Renderer**: produces a self-contained HTML page with interactive controls
-4. **Server**: serves the UI, syncs state on every interaction, supports load/export
+## Development
+
+Requires [Go](https://go.dev/) and [Just](https://github.com/casey/just).
+
+```bash
+just test                  # run all tests with merged coverage
+just go_test_unit          # unit tests only
+just go_test_integration   # integration tests only
+just update_golden         # regenerate golden files
+just lint                  # golangci-lint
+just fmt                   # format Go, CSS, and JS
+just fmt-check             # verify formatting (CI)
+just demo                  # render demo HTML and open in browser
+just a11y                  # accessibility checks with pa11y
+```
+
+## License
+
+[MIT](LICENSE)
