@@ -8,6 +8,18 @@
 
 Define requirements, items, and design options in a YAML/JSON file. `alma` evaluates which options are viable based on constraints and renders an interactive UI for alignment meetings.
 
+<p align="center">
+  <img src="docs/assets/demo-upload.webp" alt="Upload a document and explore options" width="720">
+</p>
+
+<p align="center">
+  <img src="docs/assets/demo-decision.webp" alt="Make a decision with rationale and attendees" width="720">
+</p>
+
+<p align="center">
+  <img src="docs/assets/demo-theme.webp" alt="Toggle between light and dark mode" width="720">
+</p>
+
 ## Quick Start
 
 ```bash
