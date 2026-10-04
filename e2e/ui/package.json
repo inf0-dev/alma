@@ -1,0 +1,15 @@
+{
+  "name": "e2e-ui-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for Alma's UI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4"
+  }
+}

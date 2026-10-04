@@ -1,2 +1,4 @@
 _output/
 _local/
+e2e/ui/node_modules/
+e2e/ui/test-results/
