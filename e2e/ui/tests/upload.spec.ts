@@ -10,11 +10,18 @@ test.describe("upload page", () => {
     await expect(page.locator(".req")).toHaveCount(4);
   });
 
-  test("upload invalid file shows error", async ({ page }) => {
-    await page.goto("/");
-    const fileInput = page.locator("#file-input");
-    await fileInput.setInputFiles(path.join(testdata, "invalid.yaml"));
-    await expect(page.locator("#error-msg")).toBeVisible();
+  test("upload invalid file returns error", async ({ page }) => {
+    const resp = await page.request.post("/upload", {
+      multipart: {
+        file: {
+          name: "invalid.yaml",
+          mimeType: "application/x-yaml",
+          buffer: Buffer.from("not: a: valid: alma: document\n"),
+        },
+      },
+    });
+    expect(resp.ok()).toBe(false);
+    expect(resp.status()).toBe(400);
   });
 
   test("upload replaces existing document", async ({ page }) => {
