@@ -14,6 +14,7 @@ on:
       - "api/**"
       - "go.mod"
       - "go.sum"
+      - ".github/workflows/**"
   push:
     branches:
       - main
@@ -23,6 +24,7 @@ on:
       - "api/**"
       - "go.mod"
       - "go.sum"
+      - ".github/workflows/**"
 
 jobs:
   tests:
