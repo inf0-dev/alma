@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"regexp"
 	"strings"
 
 	"github.com/tdewolff/minify/v2"
@@ -66,6 +67,7 @@ var funcMap = template.FuncMap{
 	"derefOr":         derefOr,
 	"derefInt":        func(p *int) int { return *p },
 	"string":          func(k v1.Kind) string { return string(k) },
+	"formatDesc":      formatDesc,
 }
 
 var htmlTemplate = template.Must(
@@ -211,4 +213,15 @@ func derefOr(items []v1.RecordItem, itemID string) string {
 		}
 	}
 	return ""
+}
+
+var inlineCodeRe = regexp.MustCompile("`([^`]+)`")
+
+// formatDesc converts lightweight markup in description strings to safe HTML.
+// Supported: `code` -> <code>code</code>, \n -> <br>.
+func formatDesc(s string) template.HTML {
+	escaped := template.HTMLEscapeString(s)
+	escaped = strings.ReplaceAll(escaped, "\n", "<br>")
+	escaped = inlineCodeRe.ReplaceAllString(escaped, "<code>$1</code>")
+	return template.HTML(escaped)
 }

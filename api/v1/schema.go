@@ -107,7 +107,7 @@ type DesignOption struct {
 	ID string `json:"id" yaml:"id"`
 	// Title is the title of the design option.
 	Title string `json:"title" yaml:"title"`
-	// Description is a human-readable description of the design option.
+	// Description is a human-readable description of the design option. Supports lightweight formatting: `backticks` for inline code, and literal newline characters for line breaks (use YAML block scalars or JSON \n escapes).
 	Description string `json:"description" yaml:"description"`
 	// RequirementsMet is a list of requirement IDs that this design option meets.
 	RequirementsMet RequirementsMet `json:"requirements_met,omitempty" yaml:"requirements_met,omitempty"`
