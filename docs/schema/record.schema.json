@@ -1,0 +1,534 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/inf0-dev/alma/api/v1/record",
+  "$ref": "#/$defs/Record",
+  "$defs": {
+    "Block": {
+      "properties": {
+        "condition": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "condition",
+        "reason"
+      ]
+    },
+    "ChoiceOption": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "description"
+      ]
+    },
+    "DesignOption": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "requirements_met": {
+          "$ref": "#/$defs/RequirementsMet"
+        },
+        "effects": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/Effect"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "blocks": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "type": "array"
+        },
+        "pros": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cons": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "description"
+      ]
+    },
+    "Document": {
+      "properties": {
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        },
+        "schema": {
+          "$ref": "#/$defs/Schema"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "metadata",
+        "schema"
+      ]
+    },
+    "Effect": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "kind",
+        "text"
+      ]
+    },
+    "FinalDecision": {
+      "properties": {
+        "option": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "option",
+        "title"
+      ]
+    },
+    "FiredEffect": {
+      "properties": {
+        "item": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "item",
+        "answer",
+        "kind",
+        "text"
+      ]
+    },
+    "HistoryEntry": {
+      "properties": {
+        "decided_on": {
+          "type": "string"
+        },
+        "present": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "option": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "model_sha256": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "decided_on",
+        "option",
+        "title",
+        "model_sha256"
+      ]
+    },
+    "Item": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "choice_options": {
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          },
+          "type": "array"
+        },
+        "note": {
+          "type": "string"
+        },
+        "number_config": {
+          "$ref": "#/$defs/NumberConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "description",
+        "kind"
+      ]
+    },
+    "MeetsCounts": {
+      "properties": {
+        "met": {
+          "type": "integer"
+        },
+        "of": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "met",
+        "of"
+      ]
+    },
+    "Metadata": {
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "version"
+      ]
+    },
+    "NumberConfig": {
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "min": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Record": {
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "model": {
+          "$ref": "#/$defs/Document"
+        },
+        "model_sha256": {
+          "type": "string"
+        },
+        "decided_on": {
+          "type": "string"
+        },
+        "present": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/RecordRequirement"
+          },
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/RecordItem"
+          },
+          "type": "array"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/RecordOption"
+          },
+          "type": "array"
+        },
+        "final": {
+          "$ref": "#/$defs/FinalDecision"
+        },
+        "still_open": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "history": {
+          "items": {
+            "$ref": "#/$defs/HistoryEntry"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "version",
+        "model",
+        "model_sha256",
+        "decided_on",
+        "requirements",
+        "items",
+        "options"
+      ]
+    },
+    "RecordItem": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "value": true,
+        "unit": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ]
+    },
+    "RecordOption": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "meets": {
+          "properties": {
+            "hard": {
+              "$ref": "#/$defs/MeetsCounts"
+            },
+            "soft": {
+              "$ref": "#/$defs/MeetsCounts"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "hard",
+            "soft"
+          ]
+        },
+        "failed_requirements": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fired_blocks": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "effects": {
+          "items": {
+            "$ref": "#/$defs/FiredEffect"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "status",
+        "meets",
+        "failed_requirements",
+        "fired_blocks"
+      ]
+    },
+    "RecordRequirement": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "is_hard": {
+          "type": "boolean"
+        },
+        "checked": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "is_hard",
+        "checked"
+      ]
+    },
+    "Requirement": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "is_hard": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "description",
+        "is_hard"
+      ]
+    },
+    "RequirementStatus": {
+      "properties": {
+        "met": {
+          "type": "boolean"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "met"
+      ]
+    },
+    "RequirementsMet": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RequirementStatus"
+      },
+      "type": "object"
+    },
+    "Schema": {
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string"
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Item"
+          },
+          "type": "array"
+        },
+        "design_options": {
+          "items": {
+            "$ref": "#/$defs/DesignOption"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "title"
+      ]
+    }
+  },
+  "title": "Alma Record",
+  "description": "Output schema for an alma decision record. Produced by `alma export` or the server after a session. Embeds the full input document so one file is enough to reopen or continue a decision."
+}
