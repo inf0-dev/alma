@@ -28,8 +28,7 @@
 
 | Item | Answer / Value |
 |---|---|
-{{ range .Items -}}{{ if isVisible . }}
-| {{ itemDesc $.Model .ID }} | {{ itemValue $.Model . }} |
+{{ range .Items -}}{{ if isVisible . }}| {{ itemDesc $.Model .ID }} | {{ itemValue $.Model . }} |
 {{ end }}{{ end }}
 {{- end }}
 {{- if .Options }}

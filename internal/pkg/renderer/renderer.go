@@ -216,13 +216,16 @@ func derefOr(items []v1.RecordItem, itemID string) string {
 	return ""
 }
 
-// showWhenJSON serializes a show_when condition to a JSON string for use as an HTML data attribute.
-func showWhenJSON(groups [][]string) template.HTMLAttr {
+// showWhenJSON serializes a show_when condition to a JSON string for use in a data attribute value.
+func showWhenJSON(groups [][]string) string {
 	if len(groups) == 0 {
 		return ""
 	}
-	data, _ := json.Marshal(groups)
-	return template.HTMLAttr(fmt.Sprintf(` data-show-when='%s'`, string(data)))
+	data, err := json.Marshal(groups)
+	if err != nil {
+		return "[]"
+	}
+	return string(data)
 }
 
 var inlineCodeRe = regexp.MustCompile("`([^`]+)`")

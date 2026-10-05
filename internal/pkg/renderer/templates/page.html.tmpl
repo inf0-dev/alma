@@ -91,7 +91,7 @@
     <div class="items">
       {{ range .Items -}}
       {{ $item := schemaItem $.Model .ID -}}
-      <div class="item{{ if eq (string .Kind) "text" }} item-text{{ end }}"{{ showWhenJSON $item.ShowWhen }}{{ if $item.ShowWhen }} style="display:none"{{ end }}>
+      <div class="item{{ if eq (string .Kind) "text" }} item-text{{ end }}"{{ if $item.ShowWhen }} data-show-when="{{ showWhenJSON $item.ShowWhen }}" style="display:none"{{ end }}>
         <label class="item-label" for="input-{{ $item.ID }}">{{ $item.Description }}</label>
         {{ if $item.Note }}<div class="note">{{ $item.Note }}</div>{{ end }}
         {{ if eq (string .Kind) "choice" -}}

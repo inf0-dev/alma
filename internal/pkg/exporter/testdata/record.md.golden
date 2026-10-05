@@ -24,13 +24,9 @@
 
 | Item | Answer / Value |
 |---|---|
-
 | Expected peak traffic | Over 10k RPS |
-
 | Multi-region deployment | Single region |
-
 | Cache TTL | 300 seconds |
-
 | Additional notes | Prioritize simplicity over flexibility |
 
 
@@ -66,4 +62,3 @@ Cache at the edge with a CDN provider
 
 **Cons**
 - Limited invalidation control
-
