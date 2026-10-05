@@ -55,9 +55,27 @@ func Evaluate(doc *v1.Document, requirements []v1.RecordRequirement, items []v1.
 		hardReqs[r.ID] = r.IsHard
 	}
 
+	// Build show_when lookup from schema
+	showWhen := make(map[string][][]string)
+	for _, si := range doc.Schema.Items {
+		if len(si.ShowWhen) > 0 {
+			showWhen[si.ID] = si.ShowWhen
+		}
+	}
+
+	// Compute visible items iteratively (cascade: hiding an item clears its
+	// answer, which may hide further items that depend on it).
+	visibleItems := computeVisibleItems(items, showWhen)
+
+	// Set Visible on each item and build active answer keys from visible items only
+	for i := range items {
+		v := visibleItems[items[i].ID]
+		items[i].Visible = &v
+	}
+
 	activeAnswerKeys := make(map[string]struct{})
 	for _, item := range items {
-		if item.Kind == v1.KindChoice && item.Answer != nil {
+		if item.Kind == v1.KindChoice && item.Answer != nil && visibleItems[item.ID] {
 			activeAnswerKeys[item.ID+"."+*item.Answer] = struct{}{}
 		}
 	}
@@ -69,10 +87,10 @@ func Evaluate(doc *v1.Document, requirements []v1.RecordRequirement, items []v1.
 		options = append(options, recOpt)
 	}
 
-	// Compute still_open: choice items with no answer
+	// Compute still_open: visible choice items with no answer
 	var stillOpen []string
 	for _, item := range items {
-		if item.Kind == v1.KindChoice && item.Answer == nil {
+		if item.Kind == v1.KindChoice && item.Answer == nil && visibleItems[item.ID] {
 			stillOpen = append(stillOpen, item.ID)
 		}
 	}
@@ -174,6 +192,64 @@ func evaluateOption(
 	}
 
 	return recOpt
+}
+
+// computeVisibleItems determines which items are visible given current answers and
+// show_when conditions. Uses iterative fixpoint: an item is visible if it has no
+// show_when, or at least one OR-group is fully satisfied by visible, answered items.
+// Cascades: if hiding item A causes item B's conditions to fail, B hides too.
+func computeVisibleItems(items []v1.RecordItem, showWhen map[string][][]string) map[string]bool {
+	visible := make(map[string]bool, len(items))
+	// Start: all items without show_when are visible
+	for _, item := range items {
+		if _, ok := showWhen[item.ID]; !ok {
+			visible[item.ID] = true
+		}
+	}
+
+	// Build answer lookup
+	answers := make(map[string]string) // item_id -> answer_id
+	for _, item := range items {
+		if item.Kind == v1.KindChoice && item.Answer != nil {
+			answers[item.ID] = *item.Answer
+		}
+	}
+
+	for {
+		changed := false
+		for itemID, groups := range showWhen {
+			wasVisible := visible[itemID]
+			nowVisible := false
+			for _, group := range groups {
+				allMet := true
+				for _, key := range group {
+					parts := strings.SplitN(key, ".", 2)
+					if len(parts) != 2 {
+						allMet = false
+						break
+					}
+					depID, ansID := parts[0], parts[1]
+					if !visible[depID] || answers[depID] != ansID {
+						allMet = false
+						break
+					}
+				}
+				if allMet {
+					nowVisible = true
+					break
+				}
+			}
+			if nowVisible != wasVisible {
+				visible[itemID] = nowVisible
+				changed = true
+			}
+		}
+		if !changed {
+			break
+		}
+	}
+
+	return visible
 }
 
 // Export finalizes the current record. If a previous record is provided (non-nil),

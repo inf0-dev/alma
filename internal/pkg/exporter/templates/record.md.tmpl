@@ -28,9 +28,9 @@
 
 | Item | Answer / Value |
 |---|---|
-{{ range .Items -}}
+{{ range .Items -}}{{ if isVisible . }}
 | {{ itemDesc $.Model .ID }} | {{ itemValue $.Model . }} |
-{{ end }}
+{{ end }}{{ end }}
 {{- end }}
 {{- if .Options }}
 

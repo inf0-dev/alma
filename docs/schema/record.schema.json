@@ -224,6 +224,15 @@
         },
         "number_config": {
           "$ref": "#/$defs/NumberConfig"
+        },
+        "show_when": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "array"
         }
       },
       "additionalProperties": false,
@@ -363,6 +372,9 @@
         "value": true,
         "unit": {
           "type": "string"
+        },
+        "visible": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,

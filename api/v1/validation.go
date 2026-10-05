@@ -102,6 +102,27 @@ func (s *Document) Validate() error {
 				errs = append(errs, fmt.Errorf("item %s has min greater than max in number config", item.ID))
 			}
 		}
+
+		for i, group := range item.ShowWhen {
+			if len(group) == 0 {
+				errs = append(errs, fmt.Errorf("item %s show_when[%d] must have at least one condition", item.ID, i))
+			}
+			for _, key := range group {
+				if _, exists := validAnswerKeys[key]; !exists {
+					errs = append(errs, fmt.Errorf("item %s show_when[%d] references unknown answer key: %s", item.ID, i, key))
+				}
+				// Ensure the item does not reference itself
+				parts := strings.SplitN(key, ".", 2)
+				if len(parts) == 2 && parts[0] == item.ID {
+					errs = append(errs, fmt.Errorf("item %s show_when[%d] references itself", item.ID, i))
+				}
+			}
+		}
+	}
+
+	// Detect circular show_when dependencies
+	if err := detectShowWhenCycles(schema.Items); err != nil {
+		errs = append(errs, err)
 	}
 
 	if len(schema.DesignOptions) == 0 {
@@ -285,6 +306,62 @@ func (r *Record) Validate() error {
 	}
 
 	return formatErrors(errs)
+}
+
+// detectShowWhenCycles checks for circular dependencies in show_when references.
+// An item's show_when can reference other items; if A->B->A, neither can ever become visible.
+func detectShowWhenCycles(items []Item) error {
+	// Build dependency graph: item ID → set of item IDs it depends on
+	deps := make(map[string]map[string]struct{})
+	for _, item := range items {
+		if len(item.ShowWhen) == 0 {
+			continue
+		}
+		depSet := make(map[string]struct{})
+		for _, group := range item.ShowWhen {
+			for _, key := range group {
+				parts := strings.SplitN(key, ".", 2)
+				if len(parts) == 2 {
+					depSet[parts[0]] = struct{}{}
+				}
+			}
+		}
+		deps[item.ID] = depSet
+	}
+
+	// DFS cycle detection
+	const (
+		white = 0 // unvisited
+		gray  = 1 // in progress
+		black = 2 // done
+	)
+	color := make(map[string]int)
+
+	var visit func(id string) error
+	visit = func(id string) error {
+		color[id] = gray
+		for dep := range deps[id] {
+			if color[dep] == gray {
+				return fmt.Errorf("circular show_when dependency: %s and %s depend on each other", id, dep)
+			}
+			if color[dep] == white {
+				if err := visit(dep); err != nil {
+					return err
+				}
+			}
+		}
+		color[id] = black
+		return nil
+	}
+
+	for id := range deps {
+		if color[id] == white {
+			if err := visit(id); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // formatErrors returns nil if no errors, or a numbered error list.

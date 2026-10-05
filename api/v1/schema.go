@@ -57,6 +57,10 @@ type Item struct {
 	Note string `json:"note,omitempty" yaml:"note,omitempty"`
 	// NumberConfig holds configuration specific to number items. Only valid when Kind is KindNumber.
 	NumberConfig *NumberConfig `json:"number_config,omitempty" yaml:"number_config,omitempty"`
+	// ShowWhen controls conditional visibility. The item is hidden until at least one group of conditions is met.
+	// Outer array is OR, inner array is AND. Each entry is an "item_id.answer_id" reference to a choice item.
+	// Example: [["q-deploy.cloud","q-region.us"],["q-deploy.hybrid"]] means "(cloud AND us) OR hybrid".
+	ShowWhen [][]string `json:"show_when,omitempty" yaml:"show_when,omitempty"`
 }
 
 // RequirementStatus represents whether a design option meets a requirement: fully, not at all, or partially with a reason.

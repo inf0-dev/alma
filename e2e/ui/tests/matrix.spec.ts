@@ -72,4 +72,53 @@ test.describe("matrix interactions", () => {
     await expect(pgPanel.locator(".pros li")).not.toHaveCount(0);
     await expect(pgPanel.locator(".cons li")).not.toHaveCount(0);
   });
+
+  test("show_when item is hidden initially", async ({ page }) => {
+    const partitionItem = page.locator(".item[data-show-when]");
+    await expect(partitionItem).toBeHidden();
+  });
+
+  test("show_when item appears when condition is met", async ({ page }) => {
+    const partitionItem = page.locator(".item[data-show-when]");
+    await expect(partitionItem).toBeHidden();
+
+    // Select "large" scale to satisfy show_when: [["q-scale.large"]]
+    await page
+      .locator('button[data-item="q-scale"][data-answer="large"]')
+      .click();
+
+    await expect(partitionItem).toBeVisible();
+  });
+
+  test("show_when item hides again and answer clears when condition unmet", async ({
+    page,
+  }) => {
+    const partitionItem = page.locator(".item[data-show-when]");
+
+    // Show the item
+    await page
+      .locator('button[data-item="q-scale"][data-answer="large"]')
+      .click();
+    await expect(partitionItem).toBeVisible();
+
+    // Select an answer in the conditional item
+    const rangeBtn = page.locator(
+      'button[data-item="q-partition"][data-answer="range"]',
+    );
+    await rangeBtn.click();
+    await expect(rangeBtn).toHaveAttribute("aria-pressed", "true");
+
+    // Change scale to small — partition should hide
+    await page
+      .locator('button[data-item="q-scale"][data-answer="small"]')
+      .click();
+    await expect(partitionItem).toBeHidden();
+
+    // Re-show: answer should have been cleared
+    await page
+      .locator('button[data-item="q-scale"][data-answer="large"]')
+      .click();
+    await expect(partitionItem).toBeVisible();
+    await expect(rangeBtn).toHaveAttribute("aria-pressed", "false");
+  });
 });

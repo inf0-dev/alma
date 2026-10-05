@@ -24,9 +24,13 @@
 
 | Item | Answer / Value |
 |---|---|
+
 | Expected peak traffic | Over 10k RPS |
+
 | Multi-region deployment | Single region |
+
 | Cache TTL | 300 seconds |
+
 | Additional notes | Prioritize simplicity over flexibility |
 
 

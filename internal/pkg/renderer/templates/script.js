@@ -339,7 +339,104 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // --- Render: sync ALL UI from state ---
 
+  // --- Conditional visibility (show_when) ---
+
+  // Build show_when lookup from DOM data attributes
+  var showWhenMap = {};
+  document.querySelectorAll(".item[data-show-when]").forEach(function (el) {
+    var itemId =
+      el.querySelector(".choice") && el.querySelector(".choice").dataset.item;
+    if (!itemId) {
+      var input = el.querySelector(".item-input");
+      if (input) itemId = input.dataset.item;
+    }
+    if (!itemId) {
+      // fallback: extract from the input/choice id attribute
+      var labelFor = el.querySelector("label");
+      if (labelFor) {
+        var forAttr = labelFor.getAttribute("for");
+        if (forAttr && forAttr.startsWith("input-")) {
+          itemId = forAttr.substring(6);
+        }
+      }
+    }
+    if (itemId) {
+      showWhenMap[itemId] = JSON.parse(el.dataset.showWhen);
+    }
+  });
+
+  function computeVisibleItems() {
+    var activeKeys = {};
+    state.items.forEach(function (item) {
+      if (item.kind === "choice" && item.answer) {
+        activeKeys[item.id + "." + item.answer] = true;
+      }
+    });
+
+    var visible = {};
+    state.items.forEach(function (item) {
+      if (!showWhenMap[item.id]) {
+        visible[item.id] = true;
+      }
+    });
+
+    var changed = true;
+    while (changed) {
+      changed = false;
+      for (var itemId in showWhenMap) {
+        var groups = showWhenMap[itemId];
+        var wasVisible = !!visible[itemId];
+        var nowVisible = groups.some(function (group) {
+          return group.every(function (key) {
+            var parts = key.split(".");
+            return visible[parts[0]] && activeKeys[key];
+          });
+        });
+        if (nowVisible !== wasVisible) {
+          visible[itemId] = nowVisible;
+          changed = true;
+        }
+      }
+    }
+    return visible;
+  }
+
+  function applyVisibility() {
+    var visible = computeVisibleItems();
+    // Clear answers for hidden items
+    state.items.forEach(function (item) {
+      if (!visible[item.id] && showWhenMap[item.id]) {
+        if (item.kind === "choice") item.answer = null;
+        else item.value = null;
+      }
+    });
+    // Toggle DOM visibility
+    document.querySelectorAll(".item[data-show-when]").forEach(function (el) {
+      var itemId = null;
+      var choice = el.querySelector(".choice");
+      if (choice) itemId = choice.dataset.item;
+      if (!itemId) {
+        var input = el.querySelector(".item-input");
+        if (input) itemId = input.dataset.item;
+      }
+      if (!itemId) {
+        var labelFor = el.querySelector("label");
+        if (labelFor) {
+          var forAttr = labelFor.getAttribute("for");
+          if (forAttr && forAttr.startsWith("input-"))
+            itemId = forAttr.substring(6);
+        }
+      }
+      if (itemId) {
+        el.style.display = visible[itemId] ? "" : "none";
+      }
+    });
+  }
+
   function render() {
+    // Evaluate conditional item visibility
+    applyVisibility();
+
     // Sync requirement buttons
     document.querySelectorAll(".req").forEach(function (btn) {
       var r = state.requirements.find(function (req) {
