@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"regexp"
 	"strings"
 
 	"github.com/tdewolff/minify/v2"
@@ -66,6 +67,8 @@ var funcMap = template.FuncMap{
 	"derefOr":         derefOr,
 	"derefInt":        func(p *int) int { return *p },
 	"string":          func(k v1.Kind) string { return string(k) },
+	"formatDesc":      formatDesc,
+	"showWhenJSON":    showWhenJSON,
 }
 
 var htmlTemplate = template.Must(
@@ -211,4 +214,27 @@ func derefOr(items []v1.RecordItem, itemID string) string {
 		}
 	}
 	return ""
+}
+
+// showWhenJSON serializes a show_when condition to a JSON string for use in a data attribute value.
+func showWhenJSON(groups [][]string) string {
+	if len(groups) == 0 {
+		return ""
+	}
+	data, err := json.Marshal(groups)
+	if err != nil {
+		return "[]"
+	}
+	return string(data)
+}
+
+var inlineCodeRe = regexp.MustCompile("`([^`]+)`")
+
+// formatDesc converts lightweight markup in description strings to safe HTML.
+// Supported: `code` -> <code>code</code>, \n -> <br>.
+func formatDesc(s string) template.HTML {
+	escaped := template.HTMLEscapeString(s)
+	escaped = strings.ReplaceAll(escaped, "\n", "<br>")
+	escaped = inlineCodeRe.ReplaceAllString(escaped, "<code>$1</code>")
+	return template.HTML(escaped)
 }

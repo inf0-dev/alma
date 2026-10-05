@@ -59,13 +59,27 @@
       <svg class="chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       <span class="section-title">Requirements <span class="section-count">({{ len .Requirements }})</span></span>
     </summary>
-    <div class="requirements">
-      {{ range .Requirements -}}
-      <button type="button" class="req{{ if .Checked }} active{{ end }}" data-id="{{ .ID }}" aria-pressed="{{ if .Checked }}true{{ else }}false{{ end }}">
-        {{ requirementDesc $.Model .ID }}
-        <span class="req-type">{{ if .IsHard }}hard{{ else }}soft{{ end }}</span>
-      </button>
-      {{ end }}
+    <div class="requirements-split">
+      <div class="requirements-group">
+        <span class="requirements-group-label">Hard</span>
+        <div class="requirements">
+          {{ range .Requirements -}}{{ if .IsHard -}}
+          <button type="button" class="req{{ if .Checked }} active{{ end }}" data-id="{{ .ID }}" aria-pressed="{{ if .Checked }}true{{ else }}false{{ end }}">
+            {{ requirementDesc $.Model .ID }}
+          </button>
+          {{ end }}{{ end }}
+        </div>
+      </div>
+      <div class="requirements-group">
+        <span class="requirements-group-label">Soft</span>
+        <div class="requirements">
+          {{ range .Requirements -}}{{ if not .IsHard -}}
+          <button type="button" class="req{{ if .Checked }} active{{ end }}" data-id="{{ .ID }}" aria-pressed="{{ if .Checked }}true{{ else }}false{{ end }}">
+            {{ requirementDesc $.Model .ID }}
+          </button>
+          {{ end }}{{ end }}
+        </div>
+      </div>
     </div>
   </details>
 
@@ -77,7 +91,7 @@
     <div class="items">
       {{ range .Items -}}
       {{ $item := schemaItem $.Model .ID -}}
-      <div class="item{{ if eq (string .Kind) "text" }} item-text{{ end }}">
+      <div class="item{{ if eq (string .Kind) "text" }} item-text{{ end }}"{{ if $item.ShowWhen }} data-show-when="{{ showWhenJSON $item.ShowWhen }}" style="display:none"{{ end }}>
         <label class="item-label" for="input-{{ $item.ID }}">{{ $item.Description }}</label>
         {{ if $item.Note }}<div class="note">{{ $item.Note }}</div>{{ end }}
         {{ if eq (string .Kind) "choice" -}}
@@ -132,7 +146,7 @@
             <span class="option-title">{{ $opt.Title }}</span>
             <span class="option-status {{ .Status }}">{{ .Status }}</span>
           </div>
-          {{ if $opt.Description }}<div class="option-desc">{{ $opt.Description }}</div>{{ end }}
+          {{ if $opt.Description }}<div class="option-desc">{{ formatDesc $opt.Description }}</div>{{ end }}
 
           <div class="failed-reqs" {{ if not .FailedRequirements }}style="display:none"{{ end }}>
             {{ if .FailedRequirements }}Failed: {{ joinFailedReqs $.Model .FailedRequirements }}{{ end }}

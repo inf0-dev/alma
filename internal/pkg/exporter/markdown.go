@@ -29,6 +29,7 @@ var funcMap = template.FuncMap{
 	"statusBadge":     statusBadge,
 	"deref":           func(s *string) string { return *s },
 	"string":          func(k v1.Kind) string { return string(k) },
+	"isVisible":       isVisible,
 }
 
 var mdTemplate = template.Must(
@@ -159,6 +160,10 @@ func yesNo(v bool) string {
 		return "Yes"
 	}
 	return "No"
+}
+
+func isVisible(item v1.RecordItem) bool {
+	return item.Visible == nil || *item.Visible
 }
 
 func statusBadge(s v1.OptionStatus) string {

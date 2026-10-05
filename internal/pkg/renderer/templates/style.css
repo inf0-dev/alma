@@ -70,7 +70,7 @@
 }
 
 html {
-  font-size: 110%;
+  font-size: 105%;
 }
 
 * {
@@ -212,6 +212,24 @@ details[open] > .section-heading .chevron {
 }
 
 /* Requirements */
+.requirements-split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+.requirements-group {
+  flex: 1 1 auto;
+  min-width: 200px;
+}
+.requirements-group-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+}
 .requirements {
   display: flex;
   flex-wrap: wrap;
@@ -240,16 +258,6 @@ details[open] > .section-heading .chevron {
   box-shadow: var(--shadow-md);
   background: var(--surface-hover);
 }
-.req .req-type {
-  font-size: 0.625rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-tertiary);
-  background: var(--bg);
-  padding: 0.1rem 0.3rem;
-  border-radius: 3px;
-}
 .req.active {
   background: var(--accent-active-bg);
   color: var(--accent-active-fg);
@@ -261,11 +269,6 @@ details[open] > .section-heading .chevron {
   border-color: var(--accent);
   box-shadow: var(--shadow-md);
 }
-.req.active .req-type {
-  background: var(--accent);
-  color: #ffffff;
-}
-
 /* Items */
 .items {
   display: flex;
@@ -515,8 +518,17 @@ textarea::placeholder {
 .option-desc {
   font-size: 0.9rem;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 1rem;
+}
+
+.option-desc code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
 }
 
 /* Requirements grid (commit-graph style) */

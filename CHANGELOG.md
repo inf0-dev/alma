@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Conditional item visibility via `show_when` field (outer OR, inner AND condition groups, with cascading)
+- JSON Schema generation from Go types (`alma schema [document|record]`, `just generate_schema`)
+- CI step to validate generated schemas are up-to-date (`just schema-check`)
+- (UI) Requirements section split into Hard/Soft groups for readability
+- Lightweight formatting in design option descriptions (inline \`code\` and line breaks)
+- `just release` target for safe, branch-guarded release preparation
+
 ## [0.1.0] - 2026-10-04
 
 ### Added

@@ -536,6 +536,103 @@ func TestValidateBlocks(t *testing.T) {
 	}
 }
 
+func TestValidateShowWhen(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*v1.Document)
+		wantErr string
+	}{
+		{
+			name: "valid show_when",
+			modify: func(d *v1.Document) {
+				d.Schema.Items = append(d.Schema.Items, v1.Item{
+					ID:   "q2",
+					Kind: v1.KindChoice,
+					ChoiceOptions: []v1.ChoiceOption{
+						{ID: "a", Description: "A"},
+					},
+					Description: "Depends on q1",
+					ShowWhen:    [][]string{{"q1.yes"}},
+				})
+			},
+			wantErr: "",
+		},
+		{
+			name: "show_when with unknown answer key",
+			modify: func(d *v1.Document) {
+				d.Schema.Items = append(d.Schema.Items, v1.Item{
+					ID:          "q2",
+					Kind:        v1.KindText,
+					Description: "Depends on ghost",
+					ShowWhen:    [][]string{{"q1.ghost"}},
+				})
+			},
+			wantErr: "unknown answer key: q1.ghost",
+		},
+		{
+			name: "show_when with empty group",
+			modify: func(d *v1.Document) {
+				d.Schema.Items = append(d.Schema.Items, v1.Item{
+					ID:          "q2",
+					Kind:        v1.KindText,
+					Description: "Empty group",
+					ShowWhen:    [][]string{{}},
+				})
+			},
+			wantErr: "must have at least one condition",
+		},
+		{
+			name: "show_when self-reference",
+			modify: func(d *v1.Document) {
+				d.Schema.Items[0].ShowWhen = [][]string{{"q1.yes"}}
+			},
+			wantErr: "references itself",
+		},
+		{
+			name: "show_when circular dependency",
+			modify: func(d *v1.Document) {
+				d.Schema.Items = append(d.Schema.Items, v1.Item{
+					ID:   "q2",
+					Kind: v1.KindChoice,
+					ChoiceOptions: []v1.ChoiceOption{
+						{ID: "x", Description: "X"},
+					},
+					Description: "Depends on q1",
+					ShowWhen:    [][]string{{"q1.yes"}},
+				})
+				d.Schema.Items[0].ShowWhen = [][]string{{"q2.x"}}
+			},
+			wantErr: "circular show_when dependency",
+		},
+		{
+			name: "show_when OR groups valid",
+			modify: func(d *v1.Document) {
+				d.Schema.Items = append(d.Schema.Items, v1.Item{
+					ID:          "q2",
+					Kind:        v1.KindText,
+					Description: "OR condition",
+					ShowWhen:    [][]string{{"q1.yes"}, {"q1.no"}},
+				})
+			},
+			wantErr: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			doc := validDocument()
+			tt.modify(&doc)
+			err := doc.Validate()
+			if tt.wantErr == "" {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestValidateGathersMultipleErrors(t *testing.T) {
 	doc := v1.Document{
 		Metadata: v1.Metadata{Version: "wrong"},

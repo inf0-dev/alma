@@ -361,6 +361,179 @@ func TestEvaluateStillOpen(t *testing.T) {
 	}
 }
 
+// --- ShowWhen tests ---
+
+func docWithShowWhen() *v1.Document {
+	doc := baseDocument()
+	doc.Schema.Items = append(doc.Schema.Items, v1.Item{
+		ID: "q3", Kind: v1.KindChoice, Description: "Q3 (depends on q1=yes)",
+		ChoiceOptions: []v1.ChoiceOption{
+			{ID: "x", Description: "X"},
+			{ID: "y", Description: "Y"},
+		},
+		ShowWhen: [][]string{{"q1.yes"}},
+	})
+	// Add q3 requirements_met to all options
+	for i := range doc.Schema.DesignOptions {
+		if doc.Schema.DesignOptions[i].RequirementsMet == nil {
+			doc.Schema.DesignOptions[i].RequirementsMet = v1.RequirementsMet{}
+		}
+	}
+	return doc
+}
+
+func TestEvaluateShowWhenHidesItem(t *testing.T) {
+	doc := docWithShowWhen()
+	items := []v1.RecordItem{
+		{ID: "q1", Kind: v1.KindChoice, Answer: testutil.StrPtr("no")},
+		{ID: "q2", Kind: v1.KindChoice, Answer: testutil.StrPtr("a")},
+		{ID: "q3", Kind: v1.KindChoice, Answer: testutil.StrPtr("x")},
+	}
+
+	rec, err := engine.Evaluate(doc, baseRequirements(), items)
+	require.NoError(t, err)
+
+	// q3 should be hidden (q1=no, not q1=yes)
+	for _, item := range rec.Items {
+		if item.ID == "q3" {
+			require.NotNil(t, item.Visible)
+			assert.False(t, *item.Visible, "q3 should be hidden when q1=no")
+		}
+	}
+}
+
+func TestEvaluateShowWhenShowsItem(t *testing.T) {
+	doc := docWithShowWhen()
+	items := []v1.RecordItem{
+		{ID: "q1", Kind: v1.KindChoice, Answer: testutil.StrPtr("yes")},
+		{ID: "q2", Kind: v1.KindChoice, Answer: testutil.StrPtr("a")},
+		{ID: "q3", Kind: v1.KindChoice, Answer: testutil.StrPtr("x")},
+	}
+
+	rec, err := engine.Evaluate(doc, baseRequirements(), items)
+	require.NoError(t, err)
+
+	for _, item := range rec.Items {
+		if item.ID == "q3" {
+			require.NotNil(t, item.Visible)
+			assert.True(t, *item.Visible, "q3 should be visible when q1=yes")
+		}
+	}
+}
+
+func TestEvaluateShowWhenHiddenItemNotInActiveKeys(t *testing.T) {
+	doc := docWithShowWhen()
+	// Add a block that depends on q3.x
+	doc.Schema.DesignOptions[0].Blocks = []v1.Block{
+		{Condition: []string{"q3.x"}, Reason: "q3 blocks it"},
+	}
+
+	items := []v1.RecordItem{
+		{ID: "q1", Kind: v1.KindChoice, Answer: testutil.StrPtr("no")},
+		{ID: "q2", Kind: v1.KindChoice, Answer: testutil.StrPtr("a")},
+		{ID: "q3", Kind: v1.KindChoice, Answer: testutil.StrPtr("x")},
+	}
+
+	rec, err := engine.Evaluate(doc, baseRequirements(), items)
+	require.NoError(t, err)
+
+	optByID := make(map[string]v1.RecordOption)
+	for _, o := range rec.Options {
+		optByID[o.ID] = o
+	}
+
+	// q3 is hidden (q1=no), so q3.x should NOT be in active keys, block should NOT fire
+	assert.Empty(t, optByID["opt1"].FiredBlocks, "block should not fire when dependent item is hidden")
+}
+
+func TestEvaluateShowWhenHiddenNotInStillOpen(t *testing.T) {
+	doc := docWithShowWhen()
+	items := []v1.RecordItem{
+		{ID: "q1", Kind: v1.KindChoice, Answer: testutil.StrPtr("no")},
+		{ID: "q2", Kind: v1.KindChoice, Answer: testutil.StrPtr("a")},
+		{ID: "q3", Kind: v1.KindChoice}, // unanswered but hidden
+	}
+
+	rec, err := engine.Evaluate(doc, baseRequirements(), items)
+	require.NoError(t, err)
+	assert.NotContains(t, rec.StillOpen, "q3", "hidden unanswered items should not be in still_open")
+}
+
+func TestEvaluateShowWhenCascade(t *testing.T) {
+	doc := baseDocument()
+	// q3 depends on q1=yes, q4 depends on q3=x
+	doc.Schema.Items = append(doc.Schema.Items,
+		v1.Item{
+			ID: "q3", Kind: v1.KindChoice, Description: "Q3",
+			ChoiceOptions: []v1.ChoiceOption{{ID: "x", Description: "X"}},
+			ShowWhen:      [][]string{{"q1.yes"}},
+		},
+		v1.Item{
+			ID: "q4", Kind: v1.KindChoice, Description: "Q4",
+			ChoiceOptions: []v1.ChoiceOption{{ID: "z", Description: "Z"}},
+			ShowWhen:      [][]string{{"q3.x"}},
+		},
+	)
+
+	items := []v1.RecordItem{
+		{ID: "q1", Kind: v1.KindChoice, Answer: testutil.StrPtr("no")},
+		{ID: "q2", Kind: v1.KindChoice, Answer: testutil.StrPtr("a")},
+		{ID: "q3", Kind: v1.KindChoice, Answer: testutil.StrPtr("x")},
+		{ID: "q4", Kind: v1.KindChoice, Answer: testutil.StrPtr("z")},
+	}
+
+	rec, err := engine.Evaluate(doc, baseRequirements(), items)
+	require.NoError(t, err)
+
+	for _, item := range rec.Items {
+		if item.ID == "q3" || item.ID == "q4" {
+			require.NotNil(t, item.Visible)
+			assert.False(t, *item.Visible, "%s should be hidden (cascade)", item.ID)
+		}
+	}
+}
+
+func TestEvaluateShowWhenORGroups(t *testing.T) {
+	doc := baseDocument()
+	// q3 visible if q1=yes OR q2=b
+	doc.Schema.Items = append(doc.Schema.Items, v1.Item{
+		ID: "q3", Kind: v1.KindChoice, Description: "Q3",
+		ChoiceOptions: []v1.ChoiceOption{{ID: "x", Description: "X"}},
+		ShowWhen:      [][]string{{"q1.yes"}, {"q2.b"}},
+	})
+
+	tests := []struct {
+		name    string
+		q1      string
+		q2      string
+		visible bool
+	}{
+		{"q1=yes satisfies first group", "yes", "a", true},
+		{"q2=b satisfies second group", "no", "b", true},
+		{"neither satisfied", "no", "a", false},
+		{"both satisfied", "yes", "b", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			items := []v1.RecordItem{
+				{ID: "q1", Kind: v1.KindChoice, Answer: testutil.StrPtr(tt.q1)},
+				{ID: "q2", Kind: v1.KindChoice, Answer: testutil.StrPtr(tt.q2)},
+				{ID: "q3", Kind: v1.KindChoice},
+			}
+			rec, err := engine.Evaluate(doc, baseRequirements(), items)
+			require.NoError(t, err)
+
+			for _, item := range rec.Items {
+				if item.ID == "q3" {
+					require.NotNil(t, item.Visible)
+					assert.Equal(t, tt.visible, *item.Visible)
+				}
+			}
+		})
+	}
+}
+
 // --- Export tests ---
 
 func TestExportNoPrevious(t *testing.T) {

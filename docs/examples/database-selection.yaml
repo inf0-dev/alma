@@ -47,6 +47,18 @@ schema:
       number_config:
         min: 0
         max: 10
+    - id: q-partition
+      description: "Partitioning strategy for large datasets"
+      kind: choice
+      show_when:
+        - ["q-scale.large"]
+      choice_options:
+        - id: range
+          description: "Range-based partitioning (by date, ID range)"
+        - id: hash
+          description: "Hash-based partitioning (even distribution)"
+        - id: list
+          description: "List-based partitioning (by region, tenant)"
     - id: q-notes
       description: "Additional constraints or context"
       kind: text

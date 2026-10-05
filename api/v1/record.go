@@ -45,6 +45,8 @@ type RecordItem struct {
 	Value any `json:"value,omitempty" yaml:"value,omitempty"`
 	// Unit is the unit for number items, carried from the input model for readability.
 	Unit string `json:"unit,omitempty" yaml:"unit,omitempty"`
+	// Visible indicates whether the item is visible given current show_when conditions. Derived field.
+	Visible *bool `json:"visible,omitempty" yaml:"visible,omitempty"`
 }
 
 // FiredEffect is an effect that fired for the chosen answers.
