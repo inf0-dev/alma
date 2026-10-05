@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/fang"
 	"github.com/inf0-dev/alma/app/cli/export"
 	"github.com/inf0-dev/alma/app/cli/render"
+	"github.com/inf0-dev/alma/app/cli/schema"
 	"github.com/inf0-dev/alma/app/cli/serve"
 	"github.com/inf0-dev/alma/app/cli/validate"
 	"github.com/spf13/cobra"
@@ -25,6 +26,7 @@ func main() {
 		render.NewRenderCommand(),
 		export.NewExportCommand(),
 		serve.NewServeCommand(),
+		schema.NewSchemaCommand(),
 	)
 
 	if err := fang.Execute(context.Background(), cmd, fang.WithVersion(version)); err != nil {
