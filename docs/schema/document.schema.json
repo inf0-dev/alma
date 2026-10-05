@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/inf0-dev/alma/api/v1/document",
+  "$ref": "#/$defs/Document",
+  "$defs": {
+    "Block": {
+      "properties": {
+        "condition": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "condition",
+        "reason"
+      ]
+    },
+    "ChoiceOption": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "description"
+      ]
+    },
+    "DesignOption": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "requirements_met": {
+          "$ref": "#/$defs/RequirementsMet"
+        },
+        "effects": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/Effect"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "blocks": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "type": "array"
+        },
+        "pros": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cons": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "description"
+      ]
+    },
+    "Document": {
+      "properties": {
+        "metadata": {
+          "$ref": "#/$defs/Metadata"
+        },
+        "schema": {
+          "$ref": "#/$defs/Schema"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "metadata",
+        "schema"
+      ]
+    },
+    "Effect": {
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "kind",
+        "text"
+      ]
+    },
+    "Item": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "choice_options": {
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          },
+          "type": "array"
+        },
+        "note": {
+          "type": "string"
+        },
+        "number_config": {
+          "$ref": "#/$defs/NumberConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "description",
+        "kind"
+      ]
+    },
+    "Metadata": {
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "version"
+      ]
+    },
+    "NumberConfig": {
+      "properties": {
+        "unit": {
+          "type": "string"
+        },
+        "min": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Requirement": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "is_hard": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "description",
+        "is_hard"
+      ]
+    },
+    "RequirementStatus": {
+      "properties": {
+        "met": {
+          "type": "boolean"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "met"
+      ]
+    },
+    "RequirementsMet": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RequirementStatus"
+      },
+      "type": "object"
+    },
+    "Schema": {
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string"
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/Requirement"
+          },
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Item"
+          },
+          "type": "array"
+        },
+        "design_options": {
+          "items": {
+            "$ref": "#/$defs/DesignOption"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "title"
+      ]
+    }
+  },
+  "title": "Alma Document",
+  "description": "Input schema for an alma alignment session. Define requirements, items, and design options in YAML or JSON. Feed this to `alma serve`, `alma render`, or `alma validate`."
+}

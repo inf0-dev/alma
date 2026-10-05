@@ -101,6 +101,7 @@ type Block struct {
 	Reason string `json:"reason" yaml:"reason"`
 }
 
+// DesignOption represents a single design option that the alma will evaluate against requirements, items, and blocks.
 type DesignOption struct {
 	// ID is the unique identifier as a string for the design option.
 	ID string `json:"id" yaml:"id"`

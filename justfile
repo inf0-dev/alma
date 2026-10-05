@@ -66,6 +66,14 @@ demo:
     @ go run ./app/cli render -p internal/pkg/renderer/testdata/demo.yaml -o {{ out_dir }}/demo.html
     @ open {{ out_dir }}/demo.html
 
+# generate JSON schemas from Go types
+generate_schema:
+    @ go run ./internal/cmd/genschema
+
+# check that generated schemas are up-to-date
+schema-check: generate_schema
+    @ git diff --exit-code docs/schema/
+
 # update golden files for integration tests
 update_golden:
     @ go test -tags=integration ./internal/pkg/exporter/ -update
