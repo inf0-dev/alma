@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-05
+
 ### Added
 
 - Conditional item visibility via `show_when` field (outer OR, inner AND condition groups, with cascading)
@@ -33,5 +35,6 @@
 - Playwright end-to-end UI tests
 - Accessibility testing with pa11y
 
-[Unreleased]: https://github.com/inf0-dev/alma/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/inf0-dev/alma/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/inf0-dev/alma/releases/tag/v0.1.1
 [0.1.0]: https://github.com/inf0-dev/alma/releases/tag/v0.1.0
