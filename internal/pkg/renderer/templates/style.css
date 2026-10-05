@@ -29,6 +29,9 @@
   --grid-empty: #e0e0e0;
   --grid-met: var(--alma-green);
   --grid-partial: #80ed9f;
+  --code-fg: #005f7f;
+  --code-bg: #e6f6fc;
+  --code-border: #b5e3f3;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -64,6 +67,9 @@
   --grid-empty: #333333;
   --grid-met: #2ee85a;
   --grid-partial: #60f08a;
+  --code-fg: #7dd4f0;
+  --code-bg: #0d2a38;
+  --code-border: #164a60;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -525,8 +531,9 @@ textarea::placeholder {
 .option-desc code {
   font-family: var(--mono);
   font-size: 0.85em;
-  background: var(--surface-hover);
-  border: 1px solid var(--border);
+  color: var(--code-fg);
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
   border-radius: 4px;
   padding: 0.15em 0.4em;
 }
